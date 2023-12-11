@@ -1,4 +1,5 @@
 from collections import deque
+from shapely.geometry import Polygon, Point
 
 
 def get_border(grid: list[str], start: tuple[int, int], W: int, H: int) -> tuple[set[tuple[int, int]], str]:
@@ -43,6 +44,72 @@ def get_border(grid: list[str], start: tuple[int, int], W: int, H: int) -> tuple
     closing_char = all_possible_closing_chars.pop()  # There should be only one normally
 
     return border, closing_char
+
+
+def get_polygon(grid: list[list[str]], border: set[tuple[int, int]]) -> Polygon:
+    """
+    Order the border of the maze
+    """
+    G = {
+        "|": {
+            "U": "D",
+            "D": "U"
+        },
+        "┐": {
+            "L": "D",
+            "D": "L"
+        },
+        "┌": {
+            "R": "D",
+            "D": "R"
+        },
+        "┘": {
+            "L": "U",
+            "U": "L"
+        },
+        "└": {
+            "R": "U",
+            "U": "R"
+        },
+        "-": {
+            "L": "R",
+            "R": "L"
+        }
+    }
+
+    I = {
+        "U": "D",
+        "D": "U",
+        "L": "R",
+        "R": "L"
+    }
+
+    row, col = border.pop()
+
+    item = grid[row][col]
+    in_dir = list(G[item].keys())[0]
+
+    ans = [(row, col)]
+
+    while True:
+        item = grid[row][col]
+        out_dir = G[item][in_dir]
+        if out_dir == "U":
+            row -= 1
+        elif out_dir == "D":
+            row += 1
+        elif out_dir == "L":
+            col -= 1
+        elif out_dir == "R":
+            col += 1
+        
+        in_dir = I[out_dir]
+        ans.append((row, col))
+
+        if (row, col) == ans[0]:
+            break
+
+    return Polygon(ans)
 
 
 def get_outside_positions(grid: list[str], start: tuple[int, int], W: int, H: int) -> set[tuple[int, int]]:
@@ -153,6 +220,9 @@ borders, closing_char = get_border(lines, start, W, H)
 lines[start[0]] = lines[start[0]].replace("S", closing_char)
 clean_grid = [[char if (i, j) in borders else "." for j, char in enumerate(row)] for i, row in enumerate(lines)]
 
+
+# Solution 1 - Using BFS
+
 # print(*["".join(row) for row in clean_grid], sep="\n")
 
 clean_grid = scale(clean_grid)
@@ -183,3 +253,14 @@ for row in filled_grid[1::3]:
 
 print(len(borders) // 2)
 print(dots)
+
+
+# Solution 2 - Using Shapely
+poly = get_polygon(clean_grid, borders)
+ans = 0
+for i in range(H):
+    for j in range(W):
+        if clean_grid[i][j] == ".":
+            pt = Point(i, j)
+            ans += poly.contains(pt)
+print(ans)

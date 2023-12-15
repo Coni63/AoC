@@ -13,15 +13,15 @@ def apply_gravity_up(matrix):
     rows, cols = matrix.shape
 
     for col in range(cols):
-        # Get the indices of 1s in the current column
-        ones_indices = np.where(matrix[:, col] == 1)[0]
-
-        # Iterate through each 1 in the current column
-        for idx in ones_indices:
-            # Move the 1 upwards until it reaches a 0 or 2
-            while idx > 0 and matrix[idx - 1, col] == 0:
-                matrix[idx, col], matrix[idx - 1, col] = matrix[idx - 1, col], matrix[idx, col]
-                idx -= 1
+        up = 0
+        for down in range(1, rows):
+            if matrix[down, col] == 2:
+                up = down + 1
+            elif matrix[up, col] > 0:
+                up += 1
+            elif matrix[up, col] == 0 and matrix[down, col] == 1:
+                matrix[up, col], matrix[down, col] = matrix[down, col], matrix[up, col]
+                up += 1
 
     return matrix
 
@@ -30,7 +30,7 @@ def hash_matrix(matrix):
     """
     Returned a hashed version of the matrix.
     """
-    return "".join(str(x) for x in matrix.flatten())
+    return hash(matrix.tobytes())
 
 
 def cycle(matrix):
@@ -58,7 +58,7 @@ def score(matrix):
 with open('input14.txt') as f:
     lines = f.readlines()
 
-VERSION = 1
+VERSION = 2
 mapping = {".": 0, "#": 2, "O": 1}
 
 grid = np.array([[mapping[x] for x in line if x != "\n"] for line in lines])
@@ -92,5 +92,3 @@ elif VERSION == 2:
     resulting_grid = hashmap[resulting_hash]
 
     print(score(resulting_grid))
-
-print(time.time() - tic)

@@ -26,29 +26,6 @@ def apply_gravity_up(matrix):
     return matrix
 
 
-def apply_gravity(matrix, direction):
-    """
-    Apply gravity to the matrix in the given direction (up, down, left, right).
-    """
-    if direction == "up":
-        return apply_gravity_up(matrix)
-    elif direction == "down":
-        matrix = np.rot90(matrix, k=2)
-        matrix = apply_gravity_up(matrix)
-        matrix = np.rot90(matrix, k=2)
-        return matrix
-    elif direction == "right":
-        matrix = np.rot90(matrix, k=1)
-        matrix = apply_gravity_up(matrix)
-        matrix = np.rot90(matrix, k=3)
-        return matrix
-    elif direction == "left":
-        matrix = np.rot90(matrix, k=3)
-        matrix = apply_gravity_up(matrix)
-        matrix = np.rot90(matrix, k=1)
-        return matrix
-
-
 def hash_matrix(matrix):
     """
     Returned a hashed version of the matrix.
@@ -60,10 +37,9 @@ def cycle(matrix):
     """
     Apply a cycle of gravity to the matrix.
     """
-    matrix = apply_gravity(matrix, direction="up")
-    matrix = apply_gravity(matrix, direction="left")
-    matrix = apply_gravity(matrix, direction="down")
-    matrix = apply_gravity(matrix, direction="right")
+    for _ in range(4):
+        matrix = apply_gravity_up(matrix)
+        matrix = np.rot90(matrix, k=-1)
     return matrix
 
 
@@ -82,14 +58,14 @@ def score(matrix):
 with open('input14.txt') as f:
     lines = f.readlines()
 
-VERSION = 2
+VERSION = 1
 mapping = {".": 0, "#": 2, "O": 1}
 
 grid = np.array([[mapping[x] for x in line if x != "\n"] for line in lines])
 
 tic = time.time()
 if VERSION == 1:
-    grid = apply_gravity(grid, direction="up")
+    grid = apply_gravity_up(grid)
     print(score(grid))
 
 elif VERSION == 2:

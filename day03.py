@@ -62,56 +62,61 @@ def to_hash(row, col):
     return 10000 * row + col
 
 
-with open('input03.txt') as f:
-    lines = f.readlines()
+def solve(version):
+    with open('input03.txt') as f:
+        lines = f.readlines()
 
-lines = [x.replace("\n", "") for x in lines]
-W = len(lines[0])
-H = len(lines)
+    lines = [x.replace("\n", "") for x in lines]
+    W = len(lines[0])
+    H = len(lines)
+
+    all_chars = set()
+    for line in lines:
+        all_chars |= set(line)
+    all_chars -= {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "", "."}
+
+    numbers = []
+    symbols = []
+    for i, line in enumerate(lines):
+        number = None
+        for j, char in enumerate(line):
+            if char.isnumeric() and number is None:
+                number = Number(row=i, x_start=j, x_end=j)
+                numbers.append(number)
+            elif char.isnumeric() and number is not None:
+                number.x_end = j
+            else:
+                number = None
+                if char in all_chars:
+                    symbols.append(Symbol(symbol=char, row=i, col=j))
+
+    for number in numbers:
+        number.value = int(lines[number.row][number.x_start:number.x_end+1])
+
+    symbols_hash = {to_hash(row, col): i for i, symbol in enumerate(symbols) for row, col in symbol.get_positions()}
+    numbers_hash = {to_hash(row, col): i for i, number in enumerate(numbers) for row, col in number.get_positions()}
+
+    if version == 1:
+        ans = 0
+        for number in numbers:
+            for row, col in number.get_neighbors(W, H):
+                if to_hash(row, col) in symbols_hash:
+                    ans += number.value
+                    break
+        print(ans)
+
+    else:
+        ans2 = 0
+        for symbol in symbols:
+            adjacent_numbers = set()
+            for row, col in symbol.get_neighbors(W, H):
+                if to_hash(row, col) in numbers_hash:
+                    adjacent_numbers.add(numbers_hash[to_hash(row, col)])
+            if len(adjacent_numbers) > 1:
+                ans2 += reduce(operator.mul, [numbers[i].value for i in adjacent_numbers], 1)
+        print(ans2)
 
 
-all_chars = set()
-for line in lines:
-    all_chars |= set(line)
-all_chars -= {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "", "."}
-
-numbers = []
-symbols = []
-for i, line in enumerate(lines):
-    number = None
-    for j, char in enumerate(line):
-        if char.isnumeric() and number is None:
-            number = Number(row=i, x_start=j, x_end=j)
-            numbers.append(number)
-        elif char.isnumeric() and number is not None:
-            number.x_end = j
-        else:
-            number = None
-            if char in all_chars:
-                symbols.append(Symbol(symbol=char, row=i, col=j))
-
-for number in numbers:
-    number.value = int(lines[number.row][number.x_start:number.x_end+1])
-
-
-symbols_hash = {to_hash(row, col): i for i, symbol in enumerate(symbols) for row, col in symbol.get_positions()}
-numbers_hash = {to_hash(row, col): i for i, number in enumerate(numbers) for row, col in number.get_positions()}
-
-ans = 0
-for number in numbers:
-    for row, col in number.get_neighbors(W, H):
-        if to_hash(row, col) in symbols_hash:
-            ans += number.value
-            break
-print(ans)
-
-
-ans2 = 0
-for symbol in symbols:
-    adjacent_numbers = set()
-    for row, col in symbol.get_neighbors(W, H):
-        if to_hash(row, col) in numbers_hash:
-            adjacent_numbers.add(numbers_hash[to_hash(row, col)])
-    if len(adjacent_numbers) > 1:
-        ans2 += reduce(operator.mul, [numbers[i].value for i in adjacent_numbers], 1)
-print(ans2)
+if __name__ == "__main__":
+    solve(1)
+    solve(2)

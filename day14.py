@@ -1,4 +1,3 @@
-import time
 import numpy as np
 
 """
@@ -55,40 +54,44 @@ def score(matrix):
     return ans
 
 
-with open('input14.txt') as f:
-    lines = f.readlines()
+def solve(version):
+    with open('input14.txt') as f:
+        lines = f.readlines()
 
-VERSION = 2
-mapping = {".": 0, "#": 2, "O": 1}
+    mapping = {".": 0, "#": 2, "O": 1}
 
-grid = np.array([[mapping[x] for x in line if x != "\n"] for line in lines])
+    grid = np.array([[mapping[x] for x in line if x != "\n"] for line in lines])
 
-tic = time.time()
-if VERSION == 1:
-    grid = apply_gravity_up(grid)
-    print(score(grid))
+    if version == 1:
+        grid = apply_gravity_up(grid)
+        print(score(grid))
 
-elif VERSION == 2:
+    elif version == 2:
 
-    init_hash = hash_matrix(grid)
+        init_hash = hash_matrix(grid)
 
-    hashlist = [init_hash]
-    hashmap = {init_hash: grid.copy()}
+        hashlist = [init_hash]
+        hashmap = {init_hash: grid.copy()}
 
-    while True:
-        grid = cycle(grid)
-        h = hash_matrix(grid)
-        if h in hashlist:
-            break
-        hashlist.append(h)
-        hashmap[h] = grid.copy()
+        while True:
+            grid = cycle(grid)
+            h = hash_matrix(grid)
+            if h in hashlist:
+                break
+            hashlist.append(h)
+            hashmap[h] = grid.copy()
 
-    first_match = hashlist.index(h)
-    current_turn = len(hashlist)
-    cycle_length = current_turn - first_match
+        first_match = hashlist.index(h)
+        current_turn = len(hashlist)
+        cycle_length = current_turn - first_match
 
-    iteration = (1_000_000_000 - first_match) % cycle_length + first_match
-    resulting_hash = hashlist[iteration]
-    resulting_grid = hashmap[resulting_hash]
+        iteration = (1_000_000_000 - first_match) % cycle_length + first_match
+        resulting_hash = hashlist[iteration]
+        resulting_grid = hashmap[resulting_hash]
 
-    print(score(resulting_grid))
+        print(score(resulting_grid))
+
+
+if __name__ == "__main__":
+    solve(1)
+    solve(2)

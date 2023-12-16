@@ -44,21 +44,27 @@ def replacements(hand, version=1):
         yield new_hand
 
 
-bets = []
-VERSION = 1
-with open('input07.txt') as f:
-    lines = f.readlines()
-    for line in lines:
-        hand, bid = line.split(' ')
-        bid = int(bid)
-        hand = list(hand)
+def solve(version):
+    bets = []
 
-        score_card_hand = [score_card(card, version=VERSION) for card in hand]
-        max_score_hand = max(eval_hand(new_hand) for new_hand in replacements(hand, version=VERSION))
+    with open('input07.txt') as f:
+        lines = f.readlines()
+        for line in lines:
+            hand, bid = line.split(' ')
+            bid = int(bid)
+            hand = list(hand)
 
-        bets.append((max_score_hand, score_card_hand, bid, hand))
+            score_card_hand = [score_card(card, version=version) for card in hand]
+            max_score_hand = max(eval_hand(new_hand) for new_hand in replacements(hand, version=version))
 
-    bets.sort()
+            bets.append((max_score_hand, score_card_hand, bid, hand))
 
-    ans = sum(idx * bid for idx, (_, _, bid, _) in enumerate(bets, start=1))
-    print(ans)
+        bets.sort()
+
+        ans = sum(idx * bid for idx, (_, _, bid, _) in enumerate(bets, start=1))
+        print(ans)
+
+
+if __name__ == "__main__":
+    solve(1)
+    solve(2)

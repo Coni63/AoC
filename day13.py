@@ -26,17 +26,22 @@ def find_symetry(g: list[list[int]], accepted_errors: int) -> int:
     return 0
 
 
-with open('input13.txt') as f:
-    puzzles = f.read().split("\n\n")
+def solve(version):
+    with open('input13.txt') as f:
+        puzzles = f.read().split("\n\n")
 
-VERSION = 1
-ans = 0
+    ans = 0
 
-errors = 0 if VERSION == 1 else 1
-for puzzle in puzzles:
-    g = np.array([[1 if x == "#" else 0 for x in row] for row in puzzle.split("\n")])
+    errors = 0 if version == 1 else 1
+    for puzzle in puzzles:
+        g = np.array([[1 if x == "#" else 0 for x in row] for row in puzzle.split("\n")])
 
-    ans += find_symetry(g, accepted_errors=errors)
-    ans += 100 * find_symetry(g.T, accepted_errors=errors)
+        ans += find_symetry(g, accepted_errors=errors)
+        ans += 100 * find_symetry(g.T, accepted_errors=errors)
 
-print(ans)
+    print(ans)
+
+
+if __name__ == "__main__":
+    solve(1)
+    solve(2)

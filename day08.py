@@ -1,5 +1,4 @@
 import math
-import time
 
 
 def get_graph(lines):
@@ -15,7 +14,7 @@ def get_graph(lines):
     return graph
 
 
-def get_step(node, end_nodes, dirs, graph):
+def get_step(node, end_nodes, dirs, graph, N):
     """
     Count the number of steps to reach one of the end nodes knowing the graph and the directions
     """
@@ -28,31 +27,33 @@ def get_step(node, end_nodes, dirs, graph):
         node = graph[node][i]
 
 
-VERSION = 2
+def solve(version):
 
-with open('input08.txt') as f:
-    lines = f.readlines()
+    with open('input08.txt') as f:
+        lines = f.readlines()
 
-directions = lines[0].strip()
-dir_index = [0 if x == "L" else 1 for x in directions]
-N = len(directions)
+    directions = lines[0].strip()
+    dir_index = [0 if x == "L" else 1 for x in directions]
 
-network = get_graph(lines[2:])
+    N = len(directions)
 
-start = time.time()
+    network = get_graph(lines[2:])
 
-if VERSION == 1:
-    current = ["AAA"]
-    ends = ["ZZZ"]
-else:
-    current = [x for x in network if x.endswith("A")]
-    ends = [x for x in network if x.endswith("Z")]
+    if version == 1:
+        current = ["AAA"]
+        ends = ["ZZZ"]
+    else:
+        current = [x for x in network if x.endswith("A")]
+        ends = [x for x in network if x.endswith("Z")]
 
-cycle_size = [get_step(node, ends, dir_index, network) for node in current]
+    cycle_size = [get_step(node, ends, dir_index, network, N) for node in current]
 
-lcm = 1  # least common multiple
-for i in cycle_size:
-    lcm = lcm*i//math.gcd(lcm, i)
-print(lcm)
+    lcm = 1  # least common multiple
+    for i in cycle_size:
+        lcm = lcm*i//math.gcd(lcm, i)
+    print(lcm)
 
-print(time.time() - start)
+
+if __name__ == "__main__":
+    solve(1)
+    solve(2)

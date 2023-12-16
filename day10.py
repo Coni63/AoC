@@ -1,5 +1,5 @@
 from collections import deque
-from shapely.geometry import Polygon, Point
+from shapely.geometry import Polygon
 
 
 def get_border(grid: list[str], start: tuple[int, int], W: int, H: int) -> tuple[set[tuple[int, int]], str]:
@@ -77,7 +77,7 @@ def get_polygon(grid: list[list[str]], border: set[tuple[int, int]]) -> Polygon:
         }
     }
 
-    I = {
+    invert = {
         "U": "D",
         "D": "U",
         "L": "R",
@@ -103,7 +103,7 @@ def get_polygon(grid: list[list[str]], border: set[tuple[int, int]]) -> Polygon:
         elif out_dir == "R":
             col += 1
         
-        in_dir = I[out_dir]
+        in_dir = invert[out_dir]
         ans.append((row, col))
 
         if (row, col) == ans[0]:
@@ -192,75 +192,81 @@ def scale(grid: list[str]) -> list[str]:
     return ans
 
 
-with open('input10.txt') as f:
-    lines = [
-        x
-        .replace("\n", "")
-        .replace("J", "┘")
-        .replace("7", "┐")
-        .replace("L", "└")
-        .replace("F", "┌")
-        for x in f.readlines()
-    ]
+def solve(version):
+    with open('input10.txt') as f:
+        lines = [
+            x
+            .replace("\n", "")
+            .replace("J", "┘")
+            .replace("7", "┐")
+            .replace("L", "└")
+            .replace("F", "┌")
+            for x in f.readlines()
+        ]
 
-# print(*lines, sep="\n")
+    # print(*lines, sep="\n")
 
-W = len(lines[0])
-H = len(lines)
+    W = len(lines[0])
+    H = len(lines)
 
-# print(*lines, sep="\n")
+    # print(*lines, sep="\n")
 
-for i, line in enumerate(lines):
-    if "S" in line:
-        start = (i, line.index("S"))
-        break
+    for i, line in enumerate(lines):
+        if "S" in line:
+            start = (i, line.index("S"))
+            break
 
-borders, closing_char = get_border(lines, start, W, H)
+    borders, closing_char = get_border(lines, start, W, H)
 
-lines[start[0]] = lines[start[0]].replace("S", closing_char)
-clean_grid = [[char if (i, j) in borders else "." for j, char in enumerate(row)] for i, row in enumerate(lines)]
+    if version == 1:
+        print(len(borders) // 2)
+        return
+
+    lines[start[0]] = lines[start[0]].replace("S", closing_char)
+    clean_grid = [[char if (i, j) in borders else "." for j, char in enumerate(row)] for i, row in enumerate(lines)]
+
+    # Part 2 - Solution 1 - Using BFS
+
+    # print(*["".join(row) for row in clean_grid], sep="\n")
+
+    clean_grid = scale(clean_grid)
+
+    # print(*["".join(row) for row in clean_grid], sep="\n")
+
+    W2 = len(clean_grid[0])
+    H2 = len(clean_grid)
+
+    outside = get_outside_positions(clean_grid, (0, 0), W2, H2)
+
+    filled_grid = []
+    for i, row in enumerate(clean_grid):
+        s = "".join(char if (i, j) not in outside else "#" for j, char in enumerate(row)) 
+        filled_grid.append(s)
+
+    # the remaining dots are the ones inside the maze
+    # but we need only to count the ones from an initial . which means it's a . in the middle of the 3x3 grid
+    dots = 0
+    for i in range(1, len(filled_grid), 3):
+        for j in range(1, len(filled_grid[0]), 3):
+            if filled_grid[i][j] == ".":
+                dots += 1
+
+    # for row in filled_grid[1::3]:
+    #     print(row[1::3])
+
+    print(dots)
+
+    # Part 2 - Solution 2 - Using Shapely
+    # poly = get_polygon(clean_grid, borders)
+    # ans = 0
+    # for i in range(H):
+    #     for j in range(W):
+    #         if clean_grid[i][j] == ".":
+    #             pt = Point(i, j)
+    #             ans += poly.contains(pt)
+    # print(ans)
 
 
-# Solution 1 - Using BFS
-
-# print(*["".join(row) for row in clean_grid], sep="\n")
-
-clean_grid = scale(clean_grid)
-
-# print(*["".join(row) for row in clean_grid], sep="\n")
-
-W2 = len(clean_grid[0])
-H2 = len(clean_grid)
-
-outside = get_outside_positions(clean_grid, (0, 0), W2, H2)
-
-filled_grid = []
-for i, row in enumerate(clean_grid):
-    s = "".join(char if (i, j) not in outside else "#" for j, char in enumerate(row)) 
-    filled_grid.append(s)
-    # print(s)
-
-# the remaining dots are the ones inside the maze
-# but we need only to count the ones from an initial . which means it's a . in the middle of the 3x3 grid
-dots = 0
-for i in range(1, len(filled_grid), 3):
-    for j in range(1, len(filled_grid[0]), 3):
-        if filled_grid[i][j] == ".":
-            dots += 1
-
-for row in filled_grid[1::3]:
-    print(row[1::3])
-
-print(len(borders) // 2)
-print(dots)
-
-
-# Solution 2 - Using Shapely
-poly = get_polygon(clean_grid, borders)
-ans = 0
-for i in range(H):
-    for j in range(W):
-        if clean_grid[i][j] == ".":
-            pt = Point(i, j)
-            ans += poly.contains(pt)
-print(ans)
+if __name__ == "__main__":
+    solve(1)
+    solve(2)

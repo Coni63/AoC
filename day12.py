@@ -4,7 +4,6 @@ PART I: Ok but too slow for part 2
 
 from itertools import combinations, groupby
 from functools import lru_cache
-import time
 
 
 with open('input12.txt') as f:
@@ -125,22 +124,23 @@ def check_combinations(row: str, vals: tuple[int], in_sequence: bool = False) ->
             )
 
 
-VERSION = 1
+def solve(version):
+    with open('input12.txt') as f:
+        lines = [x.replace("\n", "") for x in f.readlines()]
 
-with open('input12.txt') as f:
-    lines = [x.replace("\n", "") for x in f.readlines()]
+    ans = 0
+    for line in lines:
+        row, vals = line.split()
+        nums = tuple(int(x) for x in vals.split(","))  # require tuple for the lru_cache as list is not hashable
+        if version == 2:
+            row = "?".join([row for _ in range(5)])
+            nums = tuple(nums * 5)  # require tuple for the lru_cache as list is not hashable
+        ans += check_combinations(row, nums)
+    print(ans)
 
-tic = time.time()
-ans = 0
-for line in lines:
-    row, vals = line.split()
-    nums = tuple(int(x) for x in vals.split(","))  # require tuple for the lru_cache as list is not hashable
-    if VERSION == 2:
-        row = "?".join([row for _ in range(5)])
-        nums = tuple(nums * 5)  # require tuple for the lru_cache as list is not hashable
-    ans += check_combinations(row, nums)
-toc = time.time()
-print(ans)
+    # print(check_combinations.cache_info())  # CacheInfo(hits=125825, misses=695275, maxsize=None, currsize=695275)
 
-print(toc - tic)  # 0.9309 for part 2
-print(check_combinations.cache_info())  # CacheInfo(hits=125825, misses=695275, maxsize=None, currsize=695275)
+
+if __name__ == "__main__":
+    solve(1)
+    solve(2)

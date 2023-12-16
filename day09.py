@@ -10,14 +10,19 @@ def reduce(array, version=1):
     return array[0] - diff if version == 2 else array[-1] + diff
 
 
-with open('input09.txt') as f:
-    lines = f.readlines()
+def solve(version):
+    with open('input09.txt') as f:
+        lines = f.readlines()
 
-VERSION = 2
-ans = 0
+    ans = 0
 
-for line in lines:
-    nums = [int(x) for x in line.split()]
-    ans += reduce(nums, version=VERSION)
+    for line in lines:
+        nums = [int(x) for x in line.split()]
+        ans += reduce(nums, version=version)
 
-print(ans)
+    print(ans)
+
+
+if __name__ == "__main__":
+    solve(1)
+    solve(2)

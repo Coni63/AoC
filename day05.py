@@ -42,7 +42,7 @@ def parse_seed(seed: str, version=1) -> list[list[int]]:
         for x in seed[7:].split():
             init_seeds.extend([int(x), 1])
     else:
-        init_seeds = [int(x) for x in lines[0][7:].split()]
+        init_seeds = [int(x) for x in seed[7:].split()]
 
     ranges = []
     for seed_start, seed_offset in zip(init_seeds[::2], init_seeds[1::2]):
@@ -50,11 +50,11 @@ def parse_seed(seed: str, version=1) -> list[list[int]]:
     return ranges
 
 
-if __name__ == "__main__":
+def solve(version):
     with open("input05.txt", "r") as f:
         lines = f.read().split("\n\n")
 
-    source = parse_seed(lines[0], version=1)
+    source = parse_seed(lines[0], version=version)
     # print(source)
 
     for stage in lines[1:]:
@@ -63,3 +63,8 @@ if __name__ == "__main__":
         # print(source)
 
     print(min([x[0] for x in source]))
+
+
+if __name__ == "__main__":
+    solve(1)
+    solve(2)
